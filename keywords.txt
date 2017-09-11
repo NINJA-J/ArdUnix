@@ -1,0 +1,37 @@
+###########################################
+# Syntax Coloring Map For LiquidCrystal_I2C
+###########################################
+
+###########################################
+# Datatypes (KEYWORD1)
+###########################################
+
+ArdUnixBase			KEYWORD1
+ArdUnix 			KEYWORD1
+BaseBlock			KEYWORD1
+
+###########################################
+# Methods and Functions (KEYWORD2)
+###########################################
+
+ArdUnixBase			KEYWORD2
+update 				KEYWORD2
+updateRaw			KEYWORD2
+
+ArdUnix 			KEYWORD2
+addApp				KEYWORD2
+sprint				KEYWORD2
+
+###########################################
+# Constants (LITERAL1)
+###########################################
+
+SUCCESS         LITERAL1
+NAME_DUPLICATED LITERAL1
+MEMORY_FAILED   LITERAL1
+SSERIAL_FULL    LITERAL1
+
+
+
+
+
