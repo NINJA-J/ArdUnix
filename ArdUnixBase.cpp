@@ -1,4 +1,5 @@
 #include "ArdUnix.h"
+#include <Arduino.h>
 
 String ArdUnixBase::strSplict( String& srcStr, char splict ){
 	String temp = "";
@@ -14,4 +15,16 @@ String ArdUnixBase::strSplict( String& srcStr, char splict ){
 		}
 	}
 	return temp;
+}
+
+void ArdUnixBase::update(){
+	while( Serial.available() ){
+		char c = (char)Serial.read();
+		if( c != '\n' ){
+			cmdIn += c;
+		} else {
+			updateRaw( cmdIn );
+			cmdIn = "";
+		}
+	}
 }

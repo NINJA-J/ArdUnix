@@ -5,13 +5,15 @@
 #include <HardwareSerial.h>
 #include <SoftwareSerial.h>
 
+typedef char STATUS;
+
 class ArdUnixBase{
-	private:
+	protected:
 		String lable;
 		String cmdIn;
 	public:
 		ArdUnixBase( String lable ){ this->lable = lable; }
-		virtual void update() = 0;
+		virtual void update();
 		virtual void update( String updStr ) = 0;
 		virtual void updateRaw( String updStr ) = 0;
 		String strSplict( String& srcStr, char splict );
@@ -46,7 +48,7 @@ public:
 	ArdUnix();
 	ArdUnix( String lable );
 
-	bool addApp( String name, String lable, char splict, ArdUnixBase* app, SoftwareSerial* source = NULL );
+	STATUS addApp( String name, String lable, char splict, ArdUnixBase* app, SoftwareSerial* source = NULL );
 
 	String sprint( double t, int digits );
 	String sprint( int t );
@@ -58,7 +60,6 @@ public:
 
 class ArdUnixDemo : public ArdUnixBase{
 private:
-	static char cnt;
 public:
 	ArdUnixDemo();
 	ArdUnixDemo( String lable );
@@ -68,9 +69,7 @@ public:
 	virtual void updateRaw( String updStr );
 };
 
-char ArdUnixDemo::cnt = 0;
-
 extern ArdUnix Console;
-extern ArdUnixDemo demoApp("demo");
+extern ArdUnixDemo demoApp;
 
 #endif

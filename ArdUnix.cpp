@@ -1,13 +1,22 @@
 #include "ArdUnix.h"
+#include <HardwareSerial.h>
+#include <HardwareSerial_private.h>
+#include <Arduino.h>
 
-ArdUnix::ArdUnix():ArdUnixBase("Base"),HardwareSerial(){
+ArdUnix Console;
+
+ArdUnix::ArdUnix():
+	ArdUnixBase("Base"),
+	HardwareSerial( &UBRR0H, &UBRR0L, &UCSR0A, &UCSR0B, &UCSR0C, &UDR0 )
+{
 	head = tail = NULL;
-	sSerialList = (SoftwareSerial**)new *SoftwareSerial[5];
 	sSerialLen = 0;
 }
-ArdUnix::ArdUnix( String lable ):ArdUnixBase(lable),HardwareSerial(){
+ArdUnix::ArdUnix( String lable ):
+	ArdUnixBase(lable),
+	HardwareSerial( &UBRR0H, &UBRR0L, &UCSR0A, &UCSR0B, &UCSR0C, &UDR0 )
+{
 	head = tail = NULL;
-	sSerialList = (SoftwareSerial**)new *SoftwareSerial[5];
 	sSerialLen = 0;
 }
 String ArdUnix::sprint( double number, int digits ){
@@ -18,7 +27,7 @@ String ArdUnix::sprint( double number, int digits ){
 	if (number > 4294967040.0 || number <-4294967040.0) return "ovf";
   
 	if (number < 0.0) {
-		str = "-"
+		str = "-";
 		number = -number;
 	}
 
@@ -37,7 +46,7 @@ String ArdUnix::sprint( double number, int digits ){
 
 	while ( digits-- > 0 ) {
 		remainder *= 10.0;
-		int toPrint = (int)remainder);
+		int toPrint = (int)remainder;
 		str += ( '0' + toPrint );
 		remainder -= toPrint; 
 	}
@@ -59,15 +68,16 @@ String ArdUnix::sprint( int t ){
 	return str;
 }
 
-bool ArdUnix::addApp( String name, String lable, char splict, ArdUnixBase* app, SoftwareSerial* source ){
+STATUS ArdUnix::addApp( String name, String lable, char splict, ArdUnixBase* app, SoftwareSerial* source ){
 	BaseBlock *p = head;
 	while( p != NULL ){
 		if( p->name == name )
-			return ArdUnix.NAME_DUPLICATED;
+			return Console.NAME_DUPLICATED;
 		p = p->next;
 	}
 	p = new BaseBlock();
-	if( p == NULL ) return ArdUnix.MEMORY_FAILED;
+	if( p == NULL ) return Console.MEMORY_FAILED;
+	//error: expected primary-expression before '.' token
 	p->name = name;
 	p->lable = lable;
 	p->splict = splict;
@@ -78,27 +88,31 @@ bool ArdUnix::addApp( String name, String lable, char splict, ArdUnixBase* app, 
 		for( int i = 0; i < sSerialLen; i++ ){
 			if( sSerialList[i] == source ){
 				p->source = i;
-				return ArdUnix.SUCCESS;
+				return Console.SUCCESS;
 			}
 		}
 		if( sSerialLen == 5 )
-			return ArdUnix.SSERIAL_FULL;
+			return Console.SSERIAL_FULL;
 		sSerialList[sSerialLen] = source;
 		p->source = sSerialLen++;
-		return ArdUnix.SUCCESS;
+		return Console.SUCCESS;
 	}
 }
 
 void ArdUnix::update(){
-	BaseBlock *p = head;
-
-	while( head != null ){
-
-	}
+	ArdUnixBase::update();
 }
+
 void ArdUnix::update( String updStr ){
 
 }
 void ArdUnix::updateRaw( String updStr ){
-
+	String strLable = strSplict( updStr, " " );
+	
+	BaseBlock *p = head;
+	while( head != NULL ){
+		if( head->lable == strLable )
+			head->app->update( updStr );
+		head = head->next;
+	}
 }
