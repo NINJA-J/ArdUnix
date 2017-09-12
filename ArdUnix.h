@@ -5,19 +5,21 @@
 #include <HardwareSerial.h>
 #include <SoftwareSerial.h>
 
+#define HAVE_CONSOLE
+//#define ARDUNIX_DEBUG
+
 typedef char STATUS;
 
 class ArdUnixBase{
-	protected:
-		String lable;
-		String cmdIn;
-	public:
-		ArdUnixBase( String lable ){ this->lable = lable; }
-		virtual void update();
-		virtual void update( String updStr ) = 0;
-		virtual void updateRaw( String updStr ) = 0;
-		String strSplict( String& srcStr, char splict );
-		String getLable(){ return lable; }
+protected:
+	String lable;
+	String cmdIn;
+public:
+	ArdUnixBase( String lable ){ this->lable = lable; }
+	virtual void update( String updStr ) = 0;
+	virtual void updateRaw( String updStr ) = 0;
+	String strSplict( String& srcStr, char splict = ' ' );
+	String getLable(){ return lable; }
 };
 
 class ArdUnix : public ArdUnixBase, public HardwareSerial{
@@ -42,8 +44,6 @@ public:
 	static const char NAME_DUPLICATED = 1;
 	static const char MEMORY_FAILED   = 2;
 	static const char SSERIAL_FULL    = 3;
-	// static char SUCCESS = 0;
-	// static char SUCCESS = 0;
 
 	ArdUnix();
 	ArdUnix( String lable );
@@ -53,7 +53,7 @@ public:
 	String sprint( double t, int digits );
 	String sprint( int t );
 
-  virtual void update(){ ArdUnixBase::update(); }
+	virtual void update();
 	virtual void update( String updStr );
 	virtual void updateRaw( String updStr );
 };
@@ -64,7 +64,7 @@ public:
 	ArdUnixDemo();
 	ArdUnixDemo( String lable );
 	void doSomething();
-  virtual void update(){ ArdUnixBase::update(); };
+  void Info();
 	virtual void update( String updStr );
 	virtual void updateRaw( String updStr );
 };

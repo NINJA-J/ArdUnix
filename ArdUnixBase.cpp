@@ -2,29 +2,37 @@
 #include <Arduino.h>
 
 String ArdUnixBase::strSplict( String& srcStr, char splict ){
-	String temp = "";
-	int sLen = srcStr.length();
-	int tLen = 0;
-	for( int i = 0; i < sLen; i++ ){
-		if( srcStr[i] == splict ){
-			tLen = temp.length();
-			srcStr.substring( tLen, sLen - tLen );
-			return temp;
-		} else {
-			temp += srcStr[i];
-		}
-	}
-	return temp;
-}
+#ifdef ARDUNIX_DEBUG
+    Console.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+    Console.print( "String To Splict    = [" + srcStr + "], by \"");Console.print(splict);Console.println( "\"" );
+#endif
+    String temp = "";
+    int sLen = srcStr.length();   
+    int tLen = 0;
+    bool splictFound = false;
 
-void ArdUnixBase::update(){
-	while( Serial.available() ){
-		char c = (char)Serial.read();
-		if( c != '\n' ){
-			cmdIn += c;
-		} else {
-			updateRaw( cmdIn );
-			cmdIn = "";
-		}
-	}
+    while( tLen < sLen && srcStr[tLen] == splict ) tLen++;
+    srcStr = srcStr.substring( tLen );
+  
+    for( int i = 0; i < sLen; i++ ){
+      	if( srcStr[i] == splict ){
+            break;
+        } else {
+        temp += srcStr[i];
+      }
+    }
+    tLen = temp.length();
+  
+    while( tLen < sLen && srcStr[tLen] == splict ) tLen++;
+    srcStr = srcStr.substring( tLen );
+  
+#ifdef ARDUNIX_DEBUG
+    Console.print  ("    sLen            = ");Console.println(sLen);
+    Console.print  ("    tLen            = ");Console.println(tLen);
+    Console.println("    String Splicted = [" + temp   + "]");
+    Console.println("    String Lasted   = [" + srcStr + "]");
+    Console.println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
+#endif
+
+    return temp;
 }

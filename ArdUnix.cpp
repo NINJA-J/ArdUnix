@@ -3,7 +3,41 @@
 #include <HardwareSerial_private.h>
 #include <Arduino.h>
 
+#if defined(USART_RX_vect)
+  ISR(USART_RX_vect)
+#elif defined(USART0_RX_vect)
+  ISR(USART0_RX_vect)
+#elif defined(USART_RXC_vect)
+  ISR(USART_RXC_vect) // ATmega8
+#else
+  #error "Don't know what the Data Received vector is called for Console"
+#endif
+  {
+    Console._rx_complete_irq();
+  }
+
+#if defined(UART0_UDRE_vect)
+ISR(UART0_UDRE_vect)
+#elif defined(UART_UDRE_vect)
+ISR(UART_UDRE_vect)
+#elif defined(USART0_UDRE_vect)
+ISR(USART0_UDRE_vect)
+#elif defined(USART_UDRE_vect)
+ISR(USART_UDRE_vect)
+#else
+  #error "Don't know what the Data Register Empty vector is called for Console"
+#endif
+{
+  Console._tx_udr_empty_irq();
+}
+
 ArdUnix Console;
+
+// Function that can be weakly referenced by serialEventRun to prevent
+// pulling in this file if it's not otherwise used.
+bool Serial0_available() {
+  return Console.available();
+}
 
 ArdUnix::ArdUnix():
 	ArdUnixBase("Base"),
@@ -81,7 +115,6 @@ STATUS ArdUnix::addApp( String name, String lable, char splict, ArdUnixBase* app
 	}
 	p = new BaseBlock();
 	if( p == NULL ) return Console.MEMORY_FAILED;
-	//error: expected primary-expression before '.' token
 	p->name = name;
 	p->lable = lable;
 	p->splict = splict;
@@ -111,18 +144,43 @@ STATUS ArdUnix::addApp( String name, String lable, char splict, ArdUnixBase* app
   return SUCCESS;
 }
 
+void ArdUnix::update(){
+	while( available() ){
+		char c = (char)read();
+		if( c != '\n' ){
+			cmdIn += c;
+		} else {
+			updateRaw( cmdIn );
+			cmdIn = "";
+		}
+	}
+}
+
 void ArdUnix::update( String updStr ){
 
 }
 void ArdUnix::updateRaw( String updStr ){
-	println("Found String : [" + updStr + "]");
-	String strLable = strSplict( updStr, " " );
+  String strLable = strSplict( updStr );
+  bool foundApp = false;
+#ifdef ARDUNIX_DEBUG
+	println("Found String : [" + strLable + " " + updStr + "]");
+  println("Found Lable  : [" + strLable + "]");
+#endif
 	
 	BaseBlock *p = head;
-	while( head != NULL ){
-		println("Confirming " + head->name + " with  lable [" + head->lable + "]");
-		if( head->lable == strLable )
-			head->app->update( updStr );
-		head = head->next;
+	while( p != NULL ){
+#ifdef ARDUNIX_DEBUG
+		print("Confirming \"" + head->name + "\"\t" + ( p->lable == strLable ? "--Entered" : "" ) );
+#endif
+		if( p->lable == strLable ){
+			p->app->update( updStr );
+      foundApp = true;
+		}
+		p = p->next;
 	}
+  if( !foundApp ){
+    if( strLable.length() > 7 )
+      strLable = strLable.substring( 0, 5 ) + "..";
+    println("Console : App On Lable \"" + strLable + "\" Not Found" );
+  }
 }
