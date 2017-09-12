@@ -11,6 +11,8 @@ ArdUnix::ArdUnix():
 {
 	head = tail = NULL;
 	sSerialLen = 0;
+  for( int i = 0; i < 5; i++ )
+    sSerialList[i] = NULL;
 }
 ArdUnix::ArdUnix( String lable ):
 	ArdUnixBase(lable),
@@ -18,6 +20,8 @@ ArdUnix::ArdUnix( String lable ):
 {
 	head = tail = NULL;
 	sSerialLen = 0;
+  for( int i = 0; i < 5; i++ )
+    sSerialList[i] = NULL;
 }
 String ArdUnix::sprint( double number, int digits ){
 	String str = "";
@@ -82,35 +86,41 @@ STATUS ArdUnix::addApp( String name, String lable, char splict, ArdUnixBase* app
 	p->lable = lable;
 	p->splict = splict;
 	p->app = app;
+	p->next = NULL;
 	if( source == NULL )
 		p->source = -1;
 	else{
+    p->source = -2;
 		for( int i = 0; i < sSerialLen; i++ ){
 			if( sSerialList[i] == source ){
 				p->source = i;
-				return Console.SUCCESS;
 			}
 		}
-		if( sSerialLen == 5 )
-			return Console.SSERIAL_FULL;
+    if( p->source == -2 )
+		  if( sSerialLen == 5 )
+			  return Console.SSERIAL_FULL;
 		sSerialList[sSerialLen] = source;
 		p->source = sSerialLen++;
-		return Console.SUCCESS;
 	}
-}
-
-void ArdUnix::update(){
-	ArdUnixBase::update();
+	if( head == NULL ){
+		head = tail = p;
+	} else {
+		tail->next = p;
+		tail = p;
+	}
+  return SUCCESS;
 }
 
 void ArdUnix::update( String updStr ){
 
 }
 void ArdUnix::updateRaw( String updStr ){
+	println("Found String : [" + updStr + "]");
 	String strLable = strSplict( updStr, " " );
 	
 	BaseBlock *p = head;
 	while( head != NULL ){
+		println("Confirming " + head->name + " with  lable [" + head->lable + "]");
 		if( head->lable == strLable )
 			head->app->update( updStr );
 		head = head->next;

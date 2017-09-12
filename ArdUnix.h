@@ -34,7 +34,7 @@ private:
 	typedef struct BaseBlock BaseBlock;
 
 	BaseBlock *head, *tail;
-	SoftwareSerial **sSerialList;
+	SoftwareSerial* sSerialList[5];
 
 	int sSerialLen;
 public:
@@ -53,7 +53,7 @@ public:
 	String sprint( double t, int digits );
 	String sprint( int t );
 
-	virtual void update();
+  virtual void update(){ ArdUnixBase::update(); }
 	virtual void update( String updStr );
 	virtual void updateRaw( String updStr );
 };
@@ -64,7 +64,7 @@ public:
 	ArdUnixDemo();
 	ArdUnixDemo( String lable );
 	void doSomething();
-	virtual void update();
+  virtual void update(){ ArdUnixBase::update(); };
 	virtual void update( String updStr );
 	virtual void updateRaw( String updStr );
 };

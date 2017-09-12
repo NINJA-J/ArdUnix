@@ -10,17 +10,6 @@ void ArdUnixDemo::doSomething(){
 	Console.println( "Console has called me to do something" );
 }
 
-void ArdUnixDemo::update(){
-	while(Serial.available()){
-		char c = (char)Serial.read();
-		if( c != '\n' ){
-			cmdIn += c;
-		} else {
-			updateRaw(cmdIn);
-			cmdIn = "";
-		}
-	}
-}
 void ArdUnixDemo::update( String updStr ){
 	String cmd = strSplict( updStr, " " );
 
